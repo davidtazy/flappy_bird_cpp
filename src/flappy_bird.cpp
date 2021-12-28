@@ -10,7 +10,7 @@ const int Velocity = 5;
 const int PipeCreation = 75;
 const int PipeWidth = 50;
 const int G = 1;
-const int BirdAcc = -8;
+const int BirdAcc = -12;
 
 std::list<Pipe> pipes;
 Bird bird;
