@@ -25,6 +25,10 @@ target_link_libraries(lib${PROJECT_NAME} PUBLIC Qt5::Widgets)
 add_executable(minesweeper src/minesweeper.cpp)
 target_link_libraries(minesweeper lib${PROJECT_NAME} )
 
+
+add_executable(flappy_bird src/flappy_bird.cpp)
+target_link_libraries(flappy_bird lib${PROJECT_NAME} )
+
 option (BUILD_TESTING "build test" ON)
 
 if(BUILD_TESTING)

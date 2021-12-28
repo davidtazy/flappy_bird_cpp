@@ -1,6 +1,7 @@
 #pragma once
 
 #include "application.h"
+#include <QApplication>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTimer>
