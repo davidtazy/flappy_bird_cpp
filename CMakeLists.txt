@@ -39,5 +39,12 @@ if(BUILD_TESTING)
        )
     target_link_libraries(test_grid Qt5::Test lib${PROJECT_NAME})
     target_include_directories(test_grid PRIVATE src)
-    add_test(test_grid test_generator)
+    add_test(test_grid test_grid)
+
+    add_executable(test_matrix
+    test/test_matrix.cpp
+   )
+    target_link_libraries(test_matrix Qt5::Test lib${PROJECT_NAME})
+    target_include_directories(test_matrix PRIVATE src)
+    add_test(test_matrix test_matrix)
 endif()
