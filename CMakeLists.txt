@@ -34,17 +34,19 @@ option (BUILD_TESTING "build test" ON)
 if(BUILD_TESTING)
     enable_testing()
     find_package(Qt5Test REQUIRED)
-    add_executable(test_grid
-        test/test_grid.cpp
-       )
+
+    add_executable(test_grid  test/test_grid.cpp)
     target_link_libraries(test_grid Qt5::Test lib${PROJECT_NAME})
     target_include_directories(test_grid PRIVATE src)
     add_test(test_grid test_grid)
 
-    add_executable(test_matrix
-    test/test_matrix.cpp
-   )
+    add_executable(test_matrix test/test_matrix.cpp) 
     target_link_libraries(test_matrix Qt5::Test lib${PROJECT_NAME})
     target_include_directories(test_matrix PRIVATE src)
     add_test(test_matrix test_matrix)
+
+    add_executable(test_nn test/test_nn.cpp) 
+    target_link_libraries(test_nn Qt5::Test lib${PROJECT_NAME})
+    target_include_directories(test_nn PRIVATE src)
+    add_test(test_nn test_nn)
 endif()
