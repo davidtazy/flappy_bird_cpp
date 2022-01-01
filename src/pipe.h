@@ -9,6 +9,7 @@ struct Pipe {
   int width{20};
   int gate{100};
   int top{-1};
+  bool closest = false;
 
   Pipe(int screen_width, int screen_height, int pipe_width) {
     x = screen_width;
@@ -21,7 +22,8 @@ struct Pipe {
   bool offscreen() const { return x + width < 0; }
 
   static void draw(const Pipe &pipe, Canvas &canvas) {
-    canvas.fill(0, 0, 0);
+
+    canvas.fill((pipe.closest) ? 50 : 0, 0, 0);
 
     canvas.rect(pipe.x, 0, pipe.width, pipe.top);
     canvas.rect(pipe.x, pipe.top + pipe.gate, pipe.width, canvas.height());
