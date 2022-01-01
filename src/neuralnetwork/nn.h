@@ -157,15 +157,16 @@ public:
 
     auto mutate = [rate](double val) {
       auto randomGaussian = [](double mean, double sd) -> double {
-        std::random_device rd{};
-        std::mt19937 gen{rd()};
+        std::mt19937 gen{RandomDevice()};
         std::normal_distribution<> d{mean, sd};
 
         return d(gen);
       };
 
       if (Matrix{1, 1}.randomize().at(0, 0) < rate) {
-        return val + randomGaussian(0, 0.1);
+
+        auto m = randomGaussian(0, 0.1);
+        return val + m;
       } else {
         return val;
       }
@@ -179,6 +180,8 @@ public:
   static const ActivationFunction sigmoid;
 
   static const ActivationFunction tanh;
+
+  static std::random_device RandomDevice;
 };
 
 const ActivationFunction
@@ -188,3 +191,5 @@ const ActivationFunction
 const ActivationFunction
     NeuralNetwork::tanh([](double x) { return std::tanh(x); },
                         [](double y) { return 1.0 - (y * y); });
+
+std::random_device NeuralNetwork::RandomDevice{};

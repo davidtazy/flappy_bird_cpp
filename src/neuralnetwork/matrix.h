@@ -8,6 +8,7 @@ struct Matrix {
   int rows;
   int cols;
   std::vector<std::vector<double>> data;
+  static std::random_device RandomDevice;
 
   Matrix(int rows, int cols)
       : rows{rows}, cols{cols}, data(rows, std::vector<double>(cols, 0.0)) {}
@@ -90,13 +91,11 @@ struct Matrix {
   }
 
   Matrix &randomize() {
-    std::random_device
-        rd; // Will be used to obtain a seed for the random number engine
-    std::mt19937 gen(rd()); // Standard mersenne_twister_engine seeded with rd()
-    std::uniform_int_distribution<> distrib(1, 100000);
 
-    return map(
-        [&distrib, &gen](double, int, int) { return distrib(gen) / 100000.0; });
+    std::mt19937 gen(RandomDevice());
+    std::uniform_real_distribution<> distrib(0.0, 1.0);
+
+    return map([&distrib, &gen](double, int, int) { return distrib(gen); });
   }
 
   static Matrix transpose(const Matrix &matrix) {
@@ -200,3 +199,5 @@ static std::ostream &operator<<(std::ostream &out, const Matrix &m) {
   });
   return out;
 }
+
+std::random_device Matrix::RandomDevice{};
