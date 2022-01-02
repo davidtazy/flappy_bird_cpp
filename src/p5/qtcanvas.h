@@ -2,6 +2,7 @@
 
 #include "application.h"
 #include <QApplication>
+#include <QKeyEvent>
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTimer>
@@ -19,6 +20,7 @@ class QtCanvas : public QWidget, public Canvas {
   IApplication *m_app{};
   QPoint mouse;
   Qt::MouseButton mouseButton{Qt::NoButton};
+  char keyP{'\0'};
 
   // Canvas interface
 public:
@@ -36,7 +38,7 @@ public:
     }
   }
 
-  void setBackground(int r, int g, int b) override {
+  void background(int r, int g, int b) override {
     ThrowIfNotDrawing();
     m_painter->fillRect(0, 0, QWidget::width(), QWidget::height(),
                         QColor(r, g, b));
@@ -87,6 +89,8 @@ public:
   bool isMouseLeft() const override { return mouseButton == Qt::LeftButton; }
   bool isMouseRight() const override { return mouseButton == Qt::RightButton; }
 
+  char key() const override { return keyP; }
+
 protected:
   void paintEvent(QPaintEvent *) override {
     QPainter painter(this);
@@ -104,6 +108,13 @@ protected:
   void mouseReleaseEvent(QMouseEvent *event) override {
     mouseButton = Qt::NoButton;
   }
+
+  void keyPressEvent(QKeyEvent *event) override {
+    keyP = event->text()[0].toLatin1();
+    m_app->keyPressed(*this);
+  }
+
+  void keyReleaseEvent(QKeyEvent *event) override { keyP = '\0'; }
 
   void mouseMoveEvent(QMouseEvent *event) override { mouse = event->pos(); }
   bool isDrawing() const override { return m_painter; }

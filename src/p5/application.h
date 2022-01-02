@@ -20,7 +20,7 @@ struct Canvas {
   virtual void setSize(int width, int height) = 0;
   virtual void setFramerate(int framerate) = 0;
 
-  virtual void setBackground(int r, int g, int b) = 0;
+  virtual void background(int r, int g, int b) = 0;
 
   virtual void stroke(int r, int g, int b) = 0;
   virtual void noStroke() = 0;
@@ -43,6 +43,8 @@ struct Canvas {
   virtual bool isMouseLeft() const = 0;
   virtual bool isMouseRight() const = 0;
 
+  virtual char key() const = 0;
+
 protected:
   virtual bool isDrawing() const = 0;
   void ThrowIfNotDrawing() {
@@ -63,6 +65,8 @@ public:
   virtual void draw(Canvas &canvas) = 0;
 
   virtual void mousePressed(Canvas &canvas) = 0;
+
+  virtual void keyPressed(Canvas &canvas) = 0;
 };
 
 #include <functional>
@@ -77,6 +81,10 @@ struct Application : IApplication {
 
   void RegisterMousePressed(std::function<void(Canvas &)> mp) {
     mousePressed_cb = mp;
+  }
+
+  void RegisterKeyPressed(std::function<void(Canvas &)> kp) {
+    keyPressed_cb = kp;
   }
 
 private:
@@ -95,13 +103,22 @@ private:
       mousePressed_cb(canvas);
   }
 
+  void keyPressed(Canvas &canvas) {
+    if (keyPressed_cb)
+      keyPressed_cb(canvas);
+  }
+
   std::function<void(Canvas &)> setup_cb;
   std::function<void(Canvas &)> draw_cb;
   std::function<void(Canvas &)> mousePressed_cb;
+  std::function<void(Canvas &)> keyPressed_cb;
 };
 
 // optional methods
 void mousePressed(Canvas &) __attribute__((weak));
+
+// optional methods
+void keyPressed(Canvas &) __attribute__((weak));
 
 #define P5_BACKEND_QT()                                                        \
                                                                                \
@@ -110,6 +127,7 @@ void mousePressed(Canvas &) __attribute__((weak));
     Application p5_app;                                                        \
     p5_app.Register(setup, draw);                                              \
     p5_app.RegisterMousePressed(mousePressed);                                 \
+    p5_app.RegisterKeyPressed(keyPressed);                                     \
     QtCanvas canvas(&p5_app);                                                  \
     canvas.show();                                                             \
     canvas.setFramerate(30);                                                   \
