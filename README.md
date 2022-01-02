@@ -29,6 +29,8 @@ cmake --build . --target all
 
 ./flappy_bird
 ```
-# how to run
+## how to run
 
-click to switch between x1 to x10 learning process
+' ' key to switch between x1 to x10 game speed
+'s' key to save best bird in run_dir/best_bird.json
+'l' to load run_dir/best_bird.json and add it to the game

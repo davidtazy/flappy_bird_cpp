@@ -2,7 +2,7 @@
 #include <QTest>
 
 #include "neuralnetwork/matrix.h"
-#include "neuralnetwork/nn.h"
+//#include "neuralnetwork/nn.h"
 #include <iostream>
 class testMatrix : public QObject {
 
@@ -275,6 +275,21 @@ private slots:
 
     QVERIFY(n == m);
   }
+#ifdef JSON_SERIALIZATION
+  void test_serialization() {
+
+    // serialization
+    Matrix m(2, 3);
+    m.randomize();
+    auto data = m.serialise().dump();
+
+    // deserialisation
+    auto j = nlohmann::json::parse(data);
+    Matrix mm = Matrix::deserialise(j);
+
+    QVERIFY(m == mm);
+  }
+#endif
 };
 QTEST_MAIN(testMatrix)
 #include "test_matrix.moc"

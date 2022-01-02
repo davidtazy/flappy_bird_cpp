@@ -104,6 +104,8 @@ void draw(Canvas &canvas) {
   }
 
   // drawing stuff
+  canvas.background(255, 255, 255);
+
   for (const auto &pipe : pipes)
     Pipe::draw(pipe, canvas);
   for (auto &bird : birds) {
@@ -161,22 +163,27 @@ Bird reproduce(std::list<Bird> &b, const Canvas &canvas) {
 std::list<Bird> nextGeneration(Canvas &canvas) {
   std::list<Bird> ret;
   generation_count++;
-  std::cout << " next generation " << generation_count << "\n";
+  std::cout << "-----------------------------------\n";
+  std::cout << "generation " << generation_count << "\n";
 
   calculateFitness(failed_birds);
 
   // failed_birds.sort(
   //    [](const Bird &a, const Bird &b) { return a.fitness > b.fitness; });
 
-  std::cout << "-----------------------------------\n";
-  std::cout << "best  score " << failed_birds.front().score << " /fitness "
-            << failed_birds.front().fitness << '\n';
-  std::cout << "worst score " << failed_birds.back().score << " /fitness "
-            << failed_birds.back().fitness << '\n';
+  // std::cout << "generation best  score " << failed_birds.front().score <<
+  // '\n';
 
   for (int i = 0; i < Population; i++) {
     ret.push_back(std::move(reproduce(failed_birds, canvas)));
   }
+
+  //  best bird
+
+  if (failed_birds.front().score > best_bird.score) {
+    best_bird = failed_birds.front();
+  }
+  std::cout << "all times best score " << best_bird.score << '\n';
 
   failed_birds.clear();
 
@@ -189,6 +196,36 @@ void mousePressed(Canvas &canvas) {
   else
     cycle = 1;
   // birds.front().up();
+}
+
+void keyPressed(Canvas &canvas) {
+  if (canvas.key() == ' ') {
+    mousePressed(canvas);
+  }
+
+#ifdef JSON_SERIALIZATION
+  if (canvas.key() == 's') {
+
+    // get best running bird
+    auto &bird = *std::max_element(
+        birds.begin(), birds.end(),
+        [](const Bird &a, const Bird &b) { return a.score < b.score; });
+
+    // check if best bird come from precedent generation
+    if (best_bird.score < bird.score) {
+      best_bird = bird;
+    }
+    // save it
+    best_bird.brain.save("best_bird.json");
+  }
+
+  if (canvas.key() == 'l') {
+    // load best bird brain
+    Bird b{bird_pos + 10, canvas.height() / 2};
+    b.brain = NeuralNetwork::Load("best_bird.json");
+    birds.push_back(b);
+  }
+#endif
 }
 
 /// magic happens here

@@ -60,6 +60,8 @@ void setup(Canvas &canvas) {
 
 void draw(Canvas &canvas) {
 
+  canvas.background(255, 255, 255);
+
   // Render all cells
   grid.forEach([&canvas](const Cell &cell) { cell.draw(canvas); });
 

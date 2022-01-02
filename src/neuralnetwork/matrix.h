@@ -1,5 +1,8 @@
 #pragma once
 #include <functional>
+#ifdef JSON_SERIALIZATION
+#include <nlohmann/json.hpp>
+#endif
 #include <random>
 #include <vector>
 
@@ -169,21 +172,29 @@ struct Matrix {
         });
   }
 
-  std::string serialize() const {
-    throw std::runtime_error("Matrix::serialise TODO");
-  }
-
-  static Matrix deserialize(const std::string &data) {
-    throw std::runtime_error("Matrix::serialise TODO");
-    return Matrix{0, 0};
-  }
-
   bool operator==(const Matrix &b) const {
     if (rows != b.rows || cols != b.cols) {
       return false;
     }
     return data == b.data;
   }
+#ifdef JSON_SERIALIZATION
+  nlohmann::json serialise() const {
+    nlohmann::json j;
+    j["cols"] = cols;
+    j["rows"] = rows;
+    j["data"] = data;
+    return j;
+  }
+
+  static Matrix deserialise(const nlohmann::json &j) {
+    int cols = j["cols"];
+    int rows = j["rows"];
+    Matrix m{rows, cols};
+    m.data = j["data"].get<std::vector<std::vector<double>>>();
+    return m;
+  }
+#endif
 };
 
 #include <iomanip> // std::setw

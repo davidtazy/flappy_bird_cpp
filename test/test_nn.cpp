@@ -1,7 +1,6 @@
+#include "neuralnetwork/nn.h"
 #include <QObject>
 #include <QTest>
-
-#include "neuralnetwork/nn.h"
 #include <iostream>
 
 int random_between(int min, int max) {
@@ -18,6 +17,19 @@ class testNN : public QObject {
   Q_OBJECT
 
 private slots:
+
+#ifdef JSON_SERIALIZATION
+  void test_serialization() {
+    NeuralNetwork nn(4, 8, 2);
+    auto data = nn.serialise();
+    // std::cout << data;
+
+    NeuralNetwork mm = NeuralNetwork::deserialise(data);
+    // std::cout << mm.serialize();
+
+    QVERIFY(nn == mm);
+  }
+#endif
 
   void test_xor_ai() {
 

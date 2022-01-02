@@ -1,9 +1,13 @@
 #pragma once
 #include <cmath>
+#include <fstream>
 #include <functional>
 
 #include "matrix.h"
-// Other techniques for learning
+
+#ifdef JSON_SERIALIZATION
+#include <nlohmann/json.hpp>
+#endif
 
 using AFunction = std::function<double(double)>;
 
@@ -36,6 +40,15 @@ public:
   NeuralNetwork(NeuralNetwork &&other) = default;
   NeuralNetwork &operator=(NeuralNetwork &&other) = default;
 
+  bool operator==(const NeuralNetwork &other) const {
+    return input_nodes == other.input_nodes &&
+           hidden_nodes == other.hidden_nodes &&
+           output_nodes == other.output_nodes &&
+           weights_ih == other.weights_ih && weights_ho == other.weights_ho &&
+           bias_h == other.bias_h && bias_o == other.bias_o &&
+           learning_rate == other.learning_rate;
+  }
+
   // clang-format off
   NeuralNetwork(int inputs, int hiddens, int outputs)
       : input_nodes{inputs}
@@ -52,6 +65,16 @@ public:
     bias_o.randomize();
   }
   // clang-format on
+
+#ifdef JSON_SERIALIZATION
+  static NeuralNetwork Load(std::string filename) {
+    std::ifstream t(filename);
+    std::stringstream stream;
+    stream << t.rdbuf();
+
+    return deserialise(stream.str());
+  }
+#endif
 
   std::vector<double> predict(const std::vector<double> &input_array) const {
 
@@ -136,22 +159,36 @@ public:
     // targets.print();
     // error.print();
   }
+#ifdef JSON_SERIALIZATION
+  std::string serialise() const {
+    nlohmann::json j;
 
-  // serialize() { return JSON.stringify(this); }
+    j["input_nodes"] = input_nodes;
+    j["output_nodes"] = output_nodes;
+    j["hidden_nodes"] = hidden_nodes;
+    j["weights_ih"] = weights_ih.serialise();
+    j["weights_ho"] = weights_ho.serialise();
+    j["bias_h"] = bias_h.serialise();
+    j["bias_o"] = bias_o.serialise();
+    j["learning_rate"] = learning_rate;
 
-  /*static deserialize(data) {
-    if (typeof data == 'string') {
-      data = JSON.parse(data);
-    }
-    let nn = new NeuralNetwork(data.input_nodes, data.hidden_nodes,
-                               data.output_nodes);
-    nn.weights_ih = Matrix::deserialize(data.weights_ih);
-    nn.weights_ho = Matrix::deserialize(data.weights_ho);
-    nn.bias_h = Matrix::deserialize(data.bias_h);
-    nn.bias_o = Matrix::deserialize(data.bias_o);
-    nn.learning_rate = data.learning_rate;
+    return j.dump(4);
+  }
+
+  static NeuralNetwork deserialise(std::string data) {
+
+    auto j = nlohmann::json::parse(data);
+
+    NeuralNetwork nn(j["input_nodes"], j["hidden_nodes"], j["output_nodes"]);
+
+    nn.weights_ih = Matrix::deserialise(j["weights_ih"]);
+    nn.weights_ho = Matrix::deserialise(j["weights_ho"]);
+    nn.bias_h = Matrix::deserialise(j["bias_h"]);
+    nn.bias_o = Matrix::deserialise(j["bias_o"]);
+    nn.learning_rate = j["learning_rate"];
     return nn;
-  }*/
+  }
+#endif
 
   void mutate(double rate) {
 
@@ -177,6 +214,8 @@ public:
     this->bias_o.map(mutate);
   }
 
+  void save(std::string filename) const;
+
   static const ActivationFunction sigmoid;
 
   static const ActivationFunction tanh;
@@ -193,3 +232,16 @@ const ActivationFunction
                         [](double y) { return 1.0 - (y * y); });
 
 std::random_device NeuralNetwork::RandomDevice{};
+
+#ifdef JSON_SERIALIZATION
+std::ostream &operator<<(std::ostream &out, const NeuralNetwork &nn) {
+  auto buffer = nn.serialise();
+  out << buffer << '\n';
+  return out;
+}
+
+void NeuralNetwork::save(std::string filename) const {
+  std::ofstream f(filename);
+  f << *this;
+}
+#endif
